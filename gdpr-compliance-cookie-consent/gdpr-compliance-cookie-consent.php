@@ -7,7 +7,7 @@
  * Author URI:  https://www.calculator.io/gdpr/
  * License:     GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Version:     1.6.1
+ * Version:     1.6.2
  * Text Domain: gdpr-compliance-cookie-consent
  * Domain Path: /languages
  */

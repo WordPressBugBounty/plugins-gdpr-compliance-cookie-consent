@@ -56,7 +56,7 @@ class STM_Helpers
 
 		$prefix = in_array($lang, ['ar', 'de', 'es', 'fa', 'fr', 'hi', 'id', 'it', 'ja', 'ko', 'nl', 'pl', 'pt', 'ru', 'th', 'tr', 'vi', 'zh']) ? "/$lang" : '';
 
-        return ' We are committed to protecting your privacy and ensuring your data is handled in compliance with the <a href="https://www.calculator.io' . $prefix . '/gdpr/" ' . ($_SERVER['REQUEST_URI'] == "/" ? '' : 'rel="nofollow"') . ' target="_blank">General Data Protection Regulation (GDPR)</a>.';
+        return ' We are committed to protecting your privacy and ensuring your data is handled in compliance with the <a href="https://www.calculator.io' . $prefix . '/gdpr/" rel="nofollow" target="_blank">General Data Protection Regulation (GDPR)</a>.';
 	}
 
 	public static function stm_helpers_cmb_pages_array(){
