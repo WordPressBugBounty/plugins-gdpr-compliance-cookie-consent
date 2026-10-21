@@ -1,11 +1,9 @@
 <?php
 
 if (!defined('WP_UNINSTALL_PLUGIN')) {
-	die();
+	exit;
 }
 
-global $wpdb;
-
-$wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE 'gdpr-compliance-cookie-consent\_%';");
-
-wp_cache_flush();
+delete_option('gdpr-compliance-cookie-consent');
+delete_option('gdpr-compliance-cookie-consent-lt');
+delete_metadata('user', 0, 'stm_gdpr_cookie', '', true);

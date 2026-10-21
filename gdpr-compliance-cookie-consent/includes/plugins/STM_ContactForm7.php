@@ -3,6 +3,10 @@ namespace STM_GDPR\includes\plugins;
 
 use STM_GDPR\includes\STM_Helpers;
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class STM_ContactForm7
 {
     const SLUG = 'contact_form_7';
@@ -27,7 +31,7 @@ class STM_ContactForm7
 
 	}
 
-	public function customTagHandler($tag) {
+	public function stm_contactform7_customTagHandler($tag) {
 
 		$tag = (is_array($tag)) ? new \WPCF7_FormTag($tag) : $tag;
 		$return = '';
@@ -98,7 +102,8 @@ class STM_ContactForm7
 
 			$tag->name = 'stmgdpr';
 			$name = $tag->name;
-			$value = (isset($_POST[$name])) ? filter_var($_POST[$name], FILTER_VALIDATE_BOOLEAN) : false;
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Contact Form 7 validates its own submission before running this filter.
+			$value = (isset($_POST[$name]) && is_scalar($_POST[$name])) ? filter_var(sanitize_text_field(wp_unslash($_POST[$name])), FILTER_VALIDATE_BOOLEAN) : false;
 
 			if ($value === false) {
 				$return->invalidate($tag, STM_Helpers::stm_helpers_errorMessage(self::SLUG));

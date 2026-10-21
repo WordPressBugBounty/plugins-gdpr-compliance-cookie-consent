@@ -3,6 +3,10 @@ namespace STM_GDPR\includes\plugins;
 
 use STM_GDPR\includes\STM_Helpers;
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class STM_GravityForms
 {
     const SLUG = 'gravity_forms';
@@ -139,7 +143,7 @@ class STM_GravityForms
 		return $columns;
 	}
 
-	public function stm_gravityforms_addDate($value = '', $lead = array(), \GF_Field $field) {
+	public function stm_gravityforms_addDate($value, $lead, \GF_Field $field) {
 
 		if (isset($field['stm_gdpr']) && $field['stm_gdpr'] === true) {
 
@@ -147,6 +151,7 @@ class STM_GravityForms
 
 				$date = STM_Helpers::stm_helpers_localDate(get_option('date_format') . ' ' . get_option('time_format'), time());
 
+				/* translators: %s: date and time the consent was given */
 				$value = sprintf(__('Accepted on %s.', 'gdpr-compliance-cookie-consent'), $date);
 
 			} else {

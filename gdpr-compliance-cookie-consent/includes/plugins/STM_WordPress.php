@@ -3,6 +3,10 @@ namespace STM_GDPR\includes\plugins;
 
 use STM_GDPR\includes\STM_Helpers;
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class STM_WordPress
 {
     const SLUG = 'wordpress';
@@ -13,7 +17,7 @@ class STM_WordPress
 
 		$checkbox = apply_filters(
 			STM_GDPR_PREFIX . 'wordpress_checkbox',
-			'<p class="' . STM_GDPR_SLUG . '-checkbox"><label><input type="checkbox" name="' . STM_GDPR_SLUG . '" id="' . STM_GDPR_SLUG . '" value="1" />' . STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment() . ' <abbr class="required" title="' . esc_attr__('required', 'gdpr-compliance-cookie-consent') . '">*</abbr></label></p>',
+			'<p class="' . STM_GDPR_SLUG . '-checkbox"><label><input type="checkbox" name="' . STM_GDPR_SLUG . '" id="' . STM_GDPR_SLUG . '" value="1" />' . wp_kses_post(STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment()) . ' <abbr class="required" title="' . esc_attr__('required', 'gdpr-compliance-cookie-consent') . '">*</abbr></label></p>',
 			$submit
 		);
 
@@ -22,14 +26,16 @@ class STM_WordPress
 
 	public function stm_wordpress_displayError() {
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- runs before core processes the comment form; only checks that the consent box was ticked.
 		if (!isset($_POST[STM_GDPR_SLUG])) {
 
 			wp_die(
 				'<p>' . sprintf(
-					__('<strong>ERROR</strong>: %s', 'gdpr-compliance-cookie-consent'),
-					Helpers::errorMessage(self::SLUG)
+					/* translators: %s: error message configured for the consent checkbox */
+					esc_html__('ERROR: %s', 'gdpr-compliance-cookie-consent'),
+					esc_html(STM_Helpers::stm_helpers_errorMessage(self::SLUG))
 				) . '</p>',
-				__('Comment Submission Failure'),
+				esc_html__('Comment Submission Failure', 'gdpr-compliance-cookie-consent'),
 				array('back_link' => true)
 			);
 
@@ -39,6 +45,7 @@ class STM_WordPress
 
 	public function stm_wordpress_addCommentMeta($commentId = 0) {
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- fires inside core's comment submission, which has already validated the request.
 		if (isset($_POST[STM_GDPR_SLUG]) && !empty($commentId)) {
 
 			add_comment_meta($commentId, STM_GDPR_SLUG, time());
@@ -60,7 +67,7 @@ class STM_WordPress
 
 			$date = get_comment_meta($commentId, STM_GDPR_SLUG, true);
 			$value = (!empty($date)) ? STM_Helpers::stm_helpers_localDate(get_option('date_format') . ' ' . get_option('time_format'), $date) : esc_html__('Not accepted.', 'gdpr-compliance-cookie-consent');
-			echo $value;
+			echo esc_html($value);
 
 		}
 

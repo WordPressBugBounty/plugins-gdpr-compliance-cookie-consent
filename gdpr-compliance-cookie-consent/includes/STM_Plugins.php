@@ -8,6 +8,10 @@ use STM_GDPR\includes\plugins\STM_MailChimp;
 use STM_GDPR\includes\plugins\STM_WooCommerce;
 use STM_GDPR\includes\plugins\STM_WordPress;
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class STM_Plugins
 {
     private static $instance = null;

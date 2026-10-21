@@ -2,9 +2,9 @@
 Contributors: gdprcompliancewp
 Donate link: https://www.calculator.io/
 Tags: gdpr, cookie consent, gdpr compliance, privacy policy, cookie banner
-Requires at least: 4.6
+Requires at least: 4.9.6
 Tested up to: 7.1
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ This plugin adds GDPR-compliant cookie management to websites, ensuring legal co
 
 == Description ==
 
-GDPR Compliance and Cookie Consent is a free WordPress plugin designed to safeguard customer privacy and manage personal data responsibly on your website. It offers features such as transparent privacy and cookie policies, GDPR consent checkboxes, cookie blocking functionality, access to consumer data, and options for users to request data deletion. Compatible with WordPress 4.6 and higher, this essential plugin ensures compliance with GDPR standards, enhancing user trust.
+GDPR Compliance and Cookie Consent is a free WordPress plugin designed to safeguard customer privacy and manage personal data responsibly on your website. It offers features such as transparent privacy and cookie policies, GDPR consent checkboxes, cookie blocking functionality, access to consumer data, and options for users to request data deletion. Compatible with WordPress 4.9.6 and higher, this essential plugin ensures compliance with GDPR standards, enhancing user trust.
 
 ## What is GDPR
 
@@ -97,6 +97,12 @@ The GDPR Compliance & Cookie Consent WordPress Plugin makes your website compati
 3. Set Up Page in Menu -> GDPR.
 
 == Changelog ==
+
+= 1.6.3 =
+* Security hardening: all output of the cookie popup, consent checkboxes, widget and data access form is now escaped; popup colours, position and custom CSS are validated.
+* Replaced the bundled CMB2 library with a native WordPress Settings API page. Stored settings are unchanged.
+* Fixed a fatal error when a comment was submitted without ticking the consent checkbox, and the Contact Form 7 consent tag handler.
+* Translations load through WordPress itself; settings load their admin assets only on the plugin page; the consent cookie is set with the Secure and SameSite attributes.
 
 = 1.6.2 =
 * Tested with WordPress 7.1. Outbound credit links now carry rel="nofollow".

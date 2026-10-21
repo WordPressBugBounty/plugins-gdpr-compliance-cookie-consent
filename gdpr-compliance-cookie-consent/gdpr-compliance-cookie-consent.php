@@ -7,7 +7,7 @@
  * Author URI:  https://www.calculator.io/gdpr/
  * License:     GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Version:     1.6.2
+ * Version:     1.6.3
  * Text Domain: gdpr-compliance-cookie-consent
  * Domain Path: /languages
  */
@@ -24,6 +24,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+define('STM_GDPR_VERSION', '1.6.3');
 define('STM_GDPR_SLUG', 'gdpr-compliance-cookie-consent');
 define('STM_GDPR_PREFIX', 'stmgdpr_');
 define('STM_GDPR_ROOT_FILE', __FILE__);
@@ -41,11 +42,14 @@ class STM_GDPR
     public function init()
     {
 
-        load_plugin_textdomain('gdpr-compliance-cookie-consent', false, basename(dirname(__FILE__)) . '/languages/');
+        add_action('init', array('STM_GDPR\\includes\\STM_Plugins', 'getInstance'), 5);
+        add_action('widgets_init', array($this, 'stm_registerWidget'));
 
         if (is_admin()) {
-            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-            add_action('cmb2_admin_init', array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_generateOptionsPage'));
+            add_action('admin_menu', array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_addMenu'));
+            add_action('admin_init', array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_registerSetting'));
+            add_action('add_option_' . STM_GDPR_SLUG, array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_updated'));
+            add_action('update_option_' . STM_GDPR_SLUG, array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_updated'));
             add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'stm_pluginSettingsLink'));
             add_action('admin_enqueue_scripts', array(STM_Helpers::getInstance(), 'stm_enqueue_admin_scripts'));
         }
@@ -65,20 +69,22 @@ class STM_GDPR
         add_action('wp_ajax_stm_gpdr_data_request', array(STM_DataAccess::getInstance(), 'stm_gpdr_data_request'));
         add_action('wp_ajax_nopriv_stm_gpdr_data_request', array(STM_DataAccess::getInstance(), 'stm_gpdr_data_request'));
 
-        /* GDPR Shortcode and Widget */
+        /* GDPR Shortcode */
         add_shortcode('stm-gpdr-data-access', array(STM_DataAccess::getInstance(), 'stm_gdpr_shortcode'));
+
+    }
+
+    public function stm_registerWidget()
+    {
         require_once(STM_GDPR_PATH . '/includes/STM_DataAccessWidget.php');
-
-        /* Integrated plugins */
-        STM_Plugins::getInstance();
-
+        register_widget('STM_DataAccessWidget');
     }
 
     public function stm_pluginSettingsLink($links = array())
     {
 
         $actionLinks = array(
-            'settings' => '<a href="' . add_query_arg(array('page' => STM_GDPR_SLUG), admin_url('admin.php')) . '" aria-label="' . esc_html__('STM GDPR settings', 'gdpr-compliance-cookie-consent') . '">' . esc_html__('Settings', 'gdpr-compliance-cookie-consent') . '</a>',
+            'settings' => '<a href="' . esc_url(add_query_arg(array('page' => STM_GDPR_SLUG), admin_url('admin.php'))) . '" aria-label="' . esc_attr__('STM GDPR settings', 'gdpr-compliance-cookie-consent') . '">' . esc_html__('Settings', 'gdpr-compliance-cookie-consent') . '</a>',
         );
 
         return array_merge($actionLinks, $links);
@@ -100,12 +106,15 @@ class STM_GDPR
 function stm_autoload($class = '')
 {
 
-    if (strpos($class, 'STM_GDPR') !== 0) {
+    if (strpos($class, 'STM_GDPR\\') !== 0 || !preg_match('/^[A-Za-z0-9_\\\\]+$/', $class)) {
         return;
     }
 
     $return = str_replace('STM_GDPR\\', '', $class);
     $return = str_replace('\\', '/', $return);
+    $file = STM_GDPR_PATH . '/' . $return . '.php';
 
-    require $return . '.php';
+    if (is_readable($file)) {
+        require_once $file;
+    }
 }

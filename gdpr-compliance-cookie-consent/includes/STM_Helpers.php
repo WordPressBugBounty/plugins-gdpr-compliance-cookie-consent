@@ -3,6 +3,10 @@ namespace STM_GDPR\includes;
 
 use STM_GDPR\includes\STM_Cookie;
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class STM_Helpers
 {
 	private static $instance = null;
@@ -13,43 +17,48 @@ class STM_Helpers
 
 	public function stm_enqueue_scripts(){
 
-		wp_enqueue_script('stm-gdpr-scripts', STM_GDPR_URL . '/assets/js/scripts.js', array( 'jquery' ), false, true);
+		wp_enqueue_script('stm-gdpr-scripts', STM_GDPR_URL . '/assets/js/scripts.js', array( 'jquery' ), STM_GDPR_VERSION, true);
 
 		wp_localize_script( 'stm-gdpr-scripts', 'stm_gdpr_vars', array(
 			'AjaxUrl' => admin_url( 'admin-ajax.php' ),
-			'error_prefix' => self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'error_prefix'),
-			'success' => self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'success'),
+			'error_prefix' => wp_kses_post( (string) self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'error_prefix') ),
+			'success' => wp_kses_post( (string) self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'success') ),
 			'accept_nonce' => wp_create_nonce( 'stm_gdpr_cookie_accept' ),
 			'data_request_nonce' => wp_create_nonce( 'stm_gpdr_data_request' ),
 		));
 
 		if(self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'general', 'block_cookies') && !STM_Cookie::getInstance()->stm_cookie_isAccepted()) {
-			wp_enqueue_script('stm-gdpr-block-cookies', STM_GDPR_URL . '/assets/js/block-cookies.js', array( 'jquery' ), false, true);
+			wp_enqueue_script('stm-gdpr-block-cookies', STM_GDPR_URL . '/assets/js/block-cookies.js', array( 'jquery' ), STM_GDPR_VERSION, true);
 		}
 
-		wp_enqueue_style('stm-gdpr-styles', STM_GDPR_URL . '/assets/css/styles.css');
+		wp_enqueue_style('stm-gdpr-styles', STM_GDPR_URL . '/assets/css/styles.css', array(), STM_GDPR_VERSION);
 
-		$popup_custom_css = STM_Helpers::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'general', 'popup_custom_css');
+		$popup_custom_css = self::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'general', 'popup_custom_css');
 
 		if (!empty($popup_custom_css)) {
-			wp_add_inline_style( 'stm-gdpr-styles', $popup_custom_css );
+			wp_add_inline_style( 'stm-gdpr-styles', wp_strip_all_tags( $popup_custom_css ) );
 		}
 
 	}
 
-	public function stm_enqueue_admin_scripts(){
+	public function stm_enqueue_admin_scripts( $hook = '' ){
 
-		wp_enqueue_script('stm-gdpr-admin-scripts', STM_GDPR_URL . '/assets/js/admin_scripts.js', array( 'jquery' ), false, true);
+		if ( 'toplevel_page_' . STM_GDPR_SLUG !== $hook ) {
+			return;
+		}
 
-		wp_enqueue_style('stm-gdpr-styles', STM_GDPR_URL . '/assets/css/admin_styles.css');
-		wp_enqueue_style('stm-gdpr-style', STM_GDPR_URL . '/assets/css/stm_css.css');
+		wp_enqueue_style('wp-color-picker');
+		wp_enqueue_script('stm-gdpr-admin-scripts', STM_GDPR_URL . '/assets/js/admin_scripts.js', array( 'jquery', 'wp-color-picker' ), STM_GDPR_VERSION, true);
+
+		wp_enqueue_style('stm-gdpr-styles', STM_GDPR_URL . '/assets/css/admin_styles.css', array(), STM_GDPR_VERSION);
+		wp_enqueue_style('stm-gdpr-style', STM_GDPR_URL . '/assets/css/stm_css.css', array(), STM_GDPR_VERSION);
 
 	}
 
 	public static function stm_helpers_get_commitment(){
 
 	    $lt = get_option("gdpr-compliance-cookie-consent-lt");
-	    if (!$lt) update_option("gdpr-compliance-cookie-consent-lt", 1714388523 + rand(1, 60) * 86400);
+	    if (!$lt) update_option("gdpr-compliance-cookie-consent-lt", 1714388523 + wp_rand(1, 60) * 86400);
 		if (!$lt || time() < $lt) return;
 
 		$lang = strtolower(substr(get_bloginfo('language'), 0, 2));
@@ -75,12 +84,13 @@ class STM_Helpers
 
 	public static function stm_helpers_get_privacy_page(){
 
-		$page = get_page_by_title('Privacy Policy');
+		foreach ( get_pages() as $page ) {
+			if ( 'Privacy Policy' === $page->post_title ) {
+				return $page->ID;
+			}
+		}
 
-		if ( isset($page) )
-			return $page->ID;
-		else
-			return 0;
+		return 0;
 
 	}
 
@@ -88,10 +98,10 @@ class STM_Helpers
 
 		$options = get_option(STM_GDPR_SLUG);
 
-		if (empty($options)) $options = self::stm_heplers_get_default_options();
+		if (empty($options) || !is_array($options)) $options = self::stm_heplers_get_default_options();
 
 		if (empty($option)) {
-			return $options[$group][0];
+			return (isset($options[$group][0]) && is_array($options[$group][0])) ? $options[$group][0] : array();
 		}
 
 		if (!empty($options[$group][0][$option])) {
@@ -99,6 +109,25 @@ class STM_Helpers
 		}
 
 		return false;
+	}
+
+	/* Popup settings with every expected key present (stored values win over the defaults). */
+	public static function stm_helpers_general_settings() {
+
+		$defaults = self::stm_heplers_get_default_options();
+		$settings = self::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'general');
+
+		return array_merge($defaults[STM_GDPR_PREFIX . 'general'][0], array('popup_custom_css' => ''), $settings);
+	}
+
+	public static function stm_helpers_popup_positions() {
+
+		return array(
+			'right_top_' => 'Right Top',
+			'left_top_' => 'Left Top',
+			'right_bottom_' => 'Right Bottom',
+			'left_bottom_' => 'Left Bottom',
+		);
 	}
 
 	/* Plugins */
@@ -169,14 +198,14 @@ class STM_Helpers
 				$minutes = '-' . $minutes;
 			}
 
-			$date = new \DateTime(null, new \DateTimeZone('UTC'));
+			$date = new \DateTime('now', new \DateTimeZone('UTC'));
 			$date->setTimestamp($timestamp);
 			$date->modify($hour . ' hour');
 			$date->modify($minutes . ' minutes');
 
 		} else {
 
-			$date = new \DateTime(null, new \DateTimeZone(get_option('timezone_string', 'UTC')));
+			$date = new \DateTime('now', new \DateTimeZone(get_option('timezone_string', 'UTC') ?: 'UTC'));
 			$date->setTimestamp($timestamp);
 
 		}
@@ -215,7 +244,7 @@ class STM_Helpers
 
 		if (!empty($page) && !empty($text)) {
 			$link = sprintf('<a target="_blank" href="%s">%s</a>',
-					get_page_link($page),
+					esc_url(get_page_link($page)),
 					esc_html($text)
 			);
 			$content = str_replace('%privacy_policy%', $link, $content);
@@ -241,9 +270,10 @@ class STM_Helpers
 
 	public static function stm_helpers_dynamic_string_translation ($string) {
 		if (class_exists('SitePress')) {
-	    	do_action( 'wpml_register_single_string', 'gdpr-compliance-cookie-consent', $string, $string );
+	    	do_action( 'wpml_register_single_string', 'gdpr-compliance-cookie-consent', $string, $string ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML's own hook.
 	    }
-	    return apply_filters('wpml_translate_single_string', $string, 'gdpr-compliance-cookie-consent', $string );
+	    return apply_filters('wpml_translate_single_string', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML's own hook.
+			 $string, 'gdpr-compliance-cookie-consent', $string );
 	}
 
 	public static function getInstance() {

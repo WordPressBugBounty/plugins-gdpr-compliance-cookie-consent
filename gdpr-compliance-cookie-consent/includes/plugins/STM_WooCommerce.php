@@ -3,6 +3,10 @@ namespace STM_GDPR\includes\plugins;
 
 use STM_GDPR\includes\STM_Helpers;
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class STM_WooCommerce
 {
     const SLUG = 'woocommerce';
@@ -14,7 +18,7 @@ class STM_WooCommerce
 		$args = array(
 			'type' => 'checkbox',
 			'class' => array('stmgdpr-checkbox'),
-			'label' => STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment(),
+			'label' => wp_kses_post(STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment()),
 			'required' => true,
 		);
 		woocommerce_form_field('stmgdpr', $args);
@@ -23,6 +27,7 @@ class STM_WooCommerce
 
 	public function stm_woocommerce_displayError() {
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verifies the checkout nonce before firing woocommerce_checkout_process.
 		if (!isset($_POST['stmgdpr'])) {
 			wc_add_notice(STM_Helpers::stm_helpers_errorMessage(self::SLUG), 'error');
 		}
@@ -31,8 +36,13 @@ class STM_WooCommerce
 
 	public function stm_woocommerce_updateOrderMeta($orderID = 0) {
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verifies the checkout nonce before the order is created.
 		if (isset($_POST['stmgdpr']) && !empty($orderID)) {
-			update_post_meta($orderID, '_stmgdpr', time());
+			$order = wc_get_order($orderID);
+			if ($order) {
+				$order->update_meta_data('_stmgdpr', time());
+				$order->save_meta_data();
+			}
 		}
 
 	}
@@ -40,10 +50,10 @@ class STM_WooCommerce
 	public function stm_woocommerce_displayOrderData(\WC_Order $order) {
 
 		$label = __('GDPR accepted on:', 'gdpr-compliance-cookie-consent');
-		$date = get_post_meta($order->get_id(), '_stmgdpr', true);
+		$date = $order->get_meta('_stmgdpr', true);
 		$value = (!empty($date)) ? STM_Helpers::stm_helpers_localDate(get_option('date_format') . ' ' . get_option('time_format'), $date) : __('Not accepted.', 'gdpr-compliance-cookie-consent');
 
-		echo sprintf('<p class="form-field form-field-wide stm-gdpr-date"><strong>%s</strong><br />%s</p>', $label, $value);
+		printf('<p class="form-field form-field-wide stm-gdpr-date"><strong>%s</strong><br />%s</p>', esc_html($label), esc_html($value));
 	}
 
 	public static function getInstance() {

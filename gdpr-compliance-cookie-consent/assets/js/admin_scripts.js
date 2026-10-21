@@ -1,26 +1,43 @@
 jQuery(document).ready(function ($) {
 
-    $('#cmb2-metabox-gdpr-compliance-cookie-consent .cmb-group-title:first-child').addClass('active');
+    var $tabs = $('.stm-gdpr-tabs .nav-tab');
+    var $panels = $('.stm-gdpr-tab-content');
+    var first = $tabs.first().data('href');
 
-    var cookie = document.cookie.replace(/(?:(?:^|.*;\s*)stm_gdpr_tab\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    if (cookie) {
-        $('#cmb2-metabox-gdpr-compliance-cookie-consent .cmb-type-group').hide();
-        $('#cmb2-metabox-gdpr-compliance-cookie-consent .cmb-type-group#' + cookie).show();
-        $('#cmb2-metabox-gdpr-compliance-cookie-consent > a').removeClass('active');
-        $('#' + cookie).addClass('active');
-    } else {
-        $('#cmb2-metabox-gdpr-compliance-cookie-consent .cmb-type-group#stmgdpr_general').show();
+    // Only ids that belong to a tab are accepted from the URL hash.
+    function isTab(id) {
+        return $tabs.filter(function () {
+            return $(this).data('href') === id;
+        }).length > 0;
     }
 
-    $('#cmb2-metabox-gdpr-compliance-cookie-consent > a').on('click', function(event) {
-        event.preventDefault();
-        
-        $('#cmb2-metabox-gdpr-compliance-cookie-consent .cmb-type-group').hide();
-        $('#cmb2-metabox-gdpr-compliance-cookie-consent .cmb-type-group#' + $(this).data('href')).show();
-        $('#cmb2-metabox-gdpr-compliance-cookie-consent > a').removeClass('active');
-        $(this).addClass('active');
+    function showTab(id) {
+        $tabs.removeClass('nav-tab-active').filter(function () {
+            return $(this).data('href') === id;
+        }).addClass('nav-tab-active');
+        $panels.hide().filter(function () {
+            return this.id === id;
+        }).show();
+        try {
+            window.sessionStorage.setItem('stm_gdpr_tab', id);
+        } catch (e) { /* storage may be unavailable */ }
+    }
 
-        document.cookie = 'stm_gdpr_tab=' + $(this).data('href');
+    var start = window.location.hash.replace('#', '');
+    if (!isTab(start)) {
+        try {
+            start = window.sessionStorage.getItem('stm_gdpr_tab') || '';
+        } catch (e) {
+            start = '';
+        }
+    }
+    showTab(isTab(start) ? start : first);
+
+    $tabs.on('click', function (event) {
+        event.preventDefault();
+        showTab($(this).data('href'));
     });
+
+    $('.stm-gdpr-color').wpColorPicker();
 
 });

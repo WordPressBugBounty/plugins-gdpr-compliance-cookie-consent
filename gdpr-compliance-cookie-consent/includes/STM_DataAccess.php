@@ -3,6 +3,10 @@ namespace STM_GDPR\includes;
 
 use STM_GDPR\includes\STM_Helpers;
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class STM_DataAccess
 {
 	private static $instance = null;
@@ -13,7 +17,7 @@ class STM_DataAccess
 
 				<p>
 					<label for="stm_gpdr"><?php esc_html_e('Email address (*)', 'gdpr-compliance-cookie-consent'); ?></label>
-					<input type="email" id="stm_gpdr_data_email" class="<?php echo STM_Helpers::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'data_access', 'input-class'); ?>" name="stm_gpdr_data_email" required/>
+					<input type="email" id="stm_gpdr_data_email" class="<?php echo esc_attr( STM_Helpers::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'data_access', 'input-class') ); ?>" name="stm_gpdr_data_email" required/>
 				</p>
 
 				<p>
@@ -25,7 +29,7 @@ class STM_DataAccess
 				</p>
 
 				<p>
-					<input type="submit" class="<?php echo STM_Helpers::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'data_access', 'button-class'); ?>" value="<?php esc_attr_e('Send request', 'gdpr-compliance-cookie-consent'); ?>" />
+					<input type="submit" class="<?php echo esc_attr( STM_Helpers::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'data_access', 'button-class') ); ?>" value="<?php esc_attr_e('Send request', 'gdpr-compliance-cookie-consent'); ?>" />
 				</p>
 			</form>
 		<?php return ob_get_clean();
@@ -35,12 +39,12 @@ class STM_DataAccess
 
 		check_ajax_referer( 'stm_gpdr_data_request', 'nonce' );
 
-		$request_type  = sanitize_key( $_POST['stm_gpdr_data_type'] );
-		$email = sanitize_email( $_POST['stm_gpdr_data_email'] );
+		$errors = array();
+		$request_type = isset( $_POST['stm_gpdr_data_type'] ) ? sanitize_key( wp_unslash( $_POST['stm_gpdr_data_type'] ) ) : '';
+		$email = isset( $_POST['stm_gpdr_data_email'] ) ? sanitize_email( wp_unslash( $_POST['stm_gpdr_data_email'] ) ) : '';
 
 		if ( !function_exists( 'wp_create_user_request' ) ) {
 			wp_send_json_success( esc_html__('Your request can’t be processed on this website. Minimum required WordPress version is 4.9.6!', 'gdpr-compliance-cookie-consent') );
-			die();
 		}
 
 		if ( !empty($email) ) {
@@ -62,19 +66,17 @@ class STM_DataAccess
 			$new_request = wp_create_user_request( $email, $request_type );
 
 			if ( is_wp_error( $new_request ) ) {
-				wp_send_json_success( $new_request->get_error_message() );
+				wp_send_json_success( esc_html( $new_request->get_error_message() ) );
 			} elseif ( ! $new_request ) {
 				wp_send_json_success( esc_html__('Unable to initiate confirmation request. Please contact the administrator.', 'gdpr-compliance-cookie-consent') );
 			} else {
-				$send_request = wp_send_user_request( $new_request );
+				wp_send_user_request( $new_request );
 				wp_send_json_success( 'success' );
 			}
 
 		} else {
 			wp_send_json_success( join( '<br />', $errors ) );
 		}
-
-		die();
 
 	}
 

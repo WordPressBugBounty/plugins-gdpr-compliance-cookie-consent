@@ -1,8 +1,10 @@
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class STM_DataAccessWidget extends WP_Widget
 {
-    private static $instance = null;
-    
     public function __construct() {
 
         parent::__construct(
@@ -10,10 +12,6 @@ class STM_DataAccessWidget extends WP_Widget
             __('GDPR Compliance Widget', 'gdpr-compliance-cookie-consent'),
             array('description' => __('Sample widget based on WPBeginner Tutorial', 'gdpr-compliance-cookie-consent'))
         );
-
-        add_action('widgets_init', function() {
-			register_widget('STM_DataAccessWidget');
-		});
     }
          
     public function widget( $args, $instance ) {
@@ -56,8 +54,8 @@ class STM_DataAccessWidget extends WP_Widget
     public function form( $instance ) {
 
         
-        $title = ! empty( $instance['title'] ) ? $instance['title'] : esc_html__('', 'gdpr-compliance-cookie-consent');
-        $description = ! empty( $instance['description'] ) ? $instance['description'] : esc_html__('', 'gdpr-compliance-cookie-consent');
+        $title = ! empty( $instance['title'] ) ? $instance['title'] : '';
+        $description = ! empty( $instance['description'] ) ? $instance['description'] : '';
 
         ?>
         <p>
@@ -66,7 +64,7 @@ class STM_DataAccessWidget extends WP_Widget
         </p>
         <p>
             <label for="<?php echo esc_attr( $this->get_field_id( 'description' ) ); ?>"><?php esc_html_e('Widget description:', 'gdpr-compliance-cookie-consent'); ?></label>
-            <textarea class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'description' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'description' ) ); ?>" type="text" cols="30" rows="10"><?php echo esc_attr( $description ); ?></textarea>
+            <textarea class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'description' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'description' ) ); ?>" type="text" cols="30" rows="10"><?php echo esc_textarea( $description ); ?></textarea>
         </p>
         <?php
 
@@ -76,19 +74,9 @@ class STM_DataAccessWidget extends WP_Widget
 
         $instance = array();
         
-        $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
-        $instance['description'] = ( !empty( $new_instance['description'] ) ) ? $new_instance['description'] : '';
+        $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? sanitize_text_field( $new_instance['title'] ) : '';
+        $instance['description'] = ( !empty( $new_instance['description'] ) ) ? wp_kses_post( $new_instance['description'] ) : '';
         
         return $instance;
     }
-
-    public static function getInstance() {
-		if (!isset(self::$instance)) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
-	}
 }
-
-STM_DataAccessWidget::getInstance();
