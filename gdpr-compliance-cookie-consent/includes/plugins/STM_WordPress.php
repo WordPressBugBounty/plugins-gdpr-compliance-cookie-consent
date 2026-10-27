@@ -17,7 +17,7 @@ class STM_WordPress
 
 		$checkbox = apply_filters(
 			STM_GDPR_PREFIX . 'wordpress_checkbox',
-			'<p class="' . STM_GDPR_SLUG . '-checkbox"><label><input type="checkbox" name="' . STM_GDPR_SLUG . '" id="' . STM_GDPR_SLUG . '" value="1" />' . wp_kses_post(STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment()) . ' <abbr class="required" title="' . esc_attr__('required', 'gdpr-compliance-cookie-consent') . '">*</abbr></label></p>',
+			'<p class="' . STM_GDPR_SLUG . '-checkbox"><label><input type="checkbox" name="' . STM_GDPR_SLUG . '" id="' . STM_GDPR_SLUG . '" value="1" />' . wp_kses_post(STM_Helpers::stm_helpers_translateDefault(STM_Helpers::stm_helpers_checkboxText(self::SLUG)) . STM_Helpers::stm_helpers_get_commitment()) . ' <abbr class="required" title="' . esc_attr__('required', 'gdpr-compliance-cookie-consent') . '">*</abbr></label></p>',
 			$submit
 		);
 
@@ -33,7 +33,7 @@ class STM_WordPress
 				'<p>' . sprintf(
 					/* translators: %s: error message configured for the consent checkbox */
 					esc_html__('ERROR: %s', 'gdpr-compliance-cookie-consent'),
-					esc_html(STM_Helpers::stm_helpers_errorMessage(self::SLUG))
+					esc_html(STM_Helpers::stm_helpers_translateDefault(STM_Helpers::stm_helpers_errorMessage(self::SLUG)))
 				) . '</p>',
 				esc_html__('Comment Submission Failure', 'gdpr-compliance-cookie-consent'),
 				array('back_link' => true)

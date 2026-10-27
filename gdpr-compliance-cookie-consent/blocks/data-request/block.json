@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "gdpr-compliance-cookie-consent/data-request",
+	"title": "Data Access & Erasure Request",
+	"category": "widgets",
+	"icon": "privacy",
+	"description": "A form where visitors can ask for a copy of their personal data or ask for it to be erased.",
+	"keywords": [ "gdpr", "privacy", "personal data", "erasure", "cookie" ],
+	"textdomain": "gdpr-compliance-cookie-consent",
+	"attributes": {
+		"title": { "type": "string", "default": "" },
+		"description": { "type": "string", "default": "" }
+	},
+	"supports": { "html": false, "align": [ "wide", "full" ] },
+	"editorScript": "file:./index.js"
+}

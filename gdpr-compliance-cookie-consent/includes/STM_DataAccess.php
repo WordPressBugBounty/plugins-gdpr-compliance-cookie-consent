@@ -12,8 +12,17 @@ class STM_DataAccess
 	private static $instance = null;
 
 	public function stm_gdpr_shortcode( $args ) {
+		$args = shortcode_atts( array( 'title' => '', 'description' => '' ), (array) $args, 'stm-gpdr-data-access' );
 		ob_start(); ?>
 			<form action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" method="post" id="stm-gpdr-form">
+
+				<?php if ( '' !== $args['title'] ) : ?>
+					<h2 class="widget-title"><?php echo esc_html( $args['title'] ); ?></h2>
+				<?php endif; ?>
+
+				<?php if ( '' !== $args['description'] ) : ?>
+					<div class="stm-gdpr-description"><?php echo wp_kses_post( $args['description'] ); ?></div>
+				<?php endif; ?>
 
 				<p>
 					<label for="stm_gpdr"><?php esc_html_e('Email address (*)', 'gdpr-compliance-cookie-consent'); ?></label>

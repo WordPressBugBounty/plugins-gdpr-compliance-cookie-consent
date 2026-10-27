@@ -18,7 +18,7 @@ class STM_WooCommerce
 		$args = array(
 			'type' => 'checkbox',
 			'class' => array('stmgdpr-checkbox'),
-			'label' => wp_kses_post(STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment()),
+			'label' => wp_kses_post(STM_Helpers::stm_helpers_translateDefault(STM_Helpers::stm_helpers_checkboxText(self::SLUG)) . STM_Helpers::stm_helpers_get_commitment()),
 			'required' => true,
 		);
 		woocommerce_form_field('stmgdpr', $args);
@@ -29,7 +29,7 @@ class STM_WooCommerce
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verifies the checkout nonce before firing woocommerce_checkout_process.
 		if (!isset($_POST['stmgdpr'])) {
-			wc_add_notice(STM_Helpers::stm_helpers_errorMessage(self::SLUG), 'error');
+			wc_add_notice(STM_Helpers::stm_helpers_translateDefault(STM_Helpers::stm_helpers_errorMessage(self::SLUG)), 'error');
 		}
 
 	}

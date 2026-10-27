@@ -10,7 +10,7 @@ class STM_DataAccessWidget extends WP_Widget
         parent::__construct(
             'stm_gdpr_widget',
             __('GDPR Compliance Widget', 'gdpr-compliance-cookie-consent'),
-            array('description' => __('Sample widget based on WPBeginner Tutorial', 'gdpr-compliance-cookie-consent'))
+            array('description' => __('A form where visitors can request a copy of their personal data or its erasure', 'gdpr-compliance-cookie-consent'))
         );
     }
          

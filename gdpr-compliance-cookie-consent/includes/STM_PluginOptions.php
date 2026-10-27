@@ -42,6 +42,7 @@ class STM_PluginOptions
     /* Runs after the options were saved: re-sync the consent field of Contact Form 7 / Gravity Forms. */
     public function stm_pluginOptions_updated()
     {
+        STM_Helpers::stm_helpers_purgeCaches();
         STM_ContactForm7::getInstance()->stm_contactform7_updateForms();
         STM_GravityForms::getInstance()->stm_gravityforms_updateForms();
     }
@@ -58,6 +59,9 @@ class STM_PluginOptions
                 'block_cookies' => array('checkbox', __('Block Cookies', 'gdpr-compliance-cookie-consent'), __('Block Cookies until accepting the Coockie Consent', 'gdpr-compliance-cookie-consent')),
                 'expire_time' => array('number', __('Expire time (seconds)', 'gdpr-compliance-cookie-consent'), __('Cookie consent expire time. Default 6 months', 'gdpr-compliance-cookie-consent')),
                 'button_text' => array('text', __('Button text', 'gdpr-compliance-cookie-consent')),
+                'show_decline' => array('checkbox', __('Decline button', 'gdpr-compliance-cookie-consent'), __('Show a Decline button next to the accept button', 'gdpr-compliance-cookie-consent')),
+                'decline_text' => array('text', __('Decline button text', 'gdpr-compliance-cookie-consent')),
+                'consent_mode' => array('toggle', __('Google Consent Mode v2', 'gdpr-compliance-cookie-consent'), __('Tell Google tags (Google Analytics, Google Ads, Tag Manager) to wait for consent: storage is denied until the visitor accepts', 'gdpr-compliance-cookie-consent')),
                 'popup_content' => array('editor', __('Popup content', 'gdpr-compliance-cookie-consent')),
                 'popup_bg_color' => array('color', __('Popup background color', 'gdpr-compliance-cookie-consent')),
                 'popup_text_color' => array('color', __('Popup text color', 'gdpr-compliance-cookie-consent')),
@@ -103,7 +107,11 @@ class STM_PluginOptions
             foreach ($fields as $id => $field) {
 
                 if (!array_key_exists($id, $posted)) {
-                    if ('checkbox' === $field[0]) {
+                    if ('toggle' === $field[0]) {
+                        if (isset($input[$group])) {
+                            $current[$id] = 'off';
+                        }
+                    } elseif ('checkbox' === $field[0]) {
                         unset($current[$id]);
                     }
                     continue;
@@ -131,6 +139,9 @@ class STM_PluginOptions
 
             case 'checkbox':
                 return $value ? 'on' : '';
+
+            case 'toggle':
+                return ('off' === $value || '' === $value) ? 'off' : 'on';
 
             case 'number':
                 return (string) absint($value);
@@ -251,6 +262,11 @@ class STM_PluginOptions
 
             case 'checkbox':
                 echo '<label><input type="checkbox" id="' . esc_attr($dom_id) . '" name="' . esc_attr($name) . '" value="on"' . checked(!empty($value), true, false) . ' /> ' . esc_html($desc) . '</label>';
+                $desc = '';
+                break;
+
+            case 'toggle':
+                echo '<label><input type="checkbox" id="' . esc_attr($dom_id) . '" name="' . esc_attr($name) . '" value="on"' . checked('off' !== $value, true, false) . ' /> ' . esc_html($desc) . '</label>';
                 $desc = '';
                 break;
 

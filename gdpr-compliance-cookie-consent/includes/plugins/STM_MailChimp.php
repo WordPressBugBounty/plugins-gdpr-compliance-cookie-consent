@@ -17,7 +17,7 @@ class STM_MailChimp
 
     	$content .= '<div class="stm_gdpr_checker"><input id="stm_gdpr" class="stm_gdpr" type="checkbox" name="stm_gdpr" required />
 			<label for="stm_gdpr">
-				' . wp_kses_post(STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment()) . '
+				' . wp_kses_post(STM_Helpers::stm_helpers_translateDefault(STM_Helpers::stm_helpers_checkboxText(self::SLUG)) . STM_Helpers::stm_helpers_get_commitment()) . '
 			</label></div>';
 
 		return $content;
@@ -27,7 +27,7 @@ class STM_MailChimp
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- public MailChimp for WP form; only checks that the consent box was ticked.
 		if ( empty( $_POST['stm_gdpr'] ) ) {
-			$errors[] = STM_Helpers::stm_helpers_errorMessage(self::SLUG);
+			$errors[] = STM_Helpers::stm_helpers_translateDefault(STM_Helpers::stm_helpers_errorMessage(self::SLUG));
 		}
 
 		return $errors;

@@ -17,7 +17,7 @@ class STM_BuddyPress
 
 		echo '<input id="stm_gdpr" class="stm_gdpr" type="checkbox" name="stm_gdpr" required />
 		<label for="stm_gdpr">
-			' . wp_kses_post(STM_Helpers::stm_helpers_checkboxText(self::SLUG) . STM_Helpers::stm_helpers_get_commitment()) . '
+			' . wp_kses_post(STM_Helpers::stm_helpers_translateDefault(STM_Helpers::stm_helpers_checkboxText(self::SLUG)) . STM_Helpers::stm_helpers_get_commitment()) . '
 		</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the dynamic part is passed through wp_kses_post.
 	}
 

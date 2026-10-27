@@ -1,102 +1,131 @@
 === GDPR Compliance & Cookie Consent ===
-Contributors: gdprcompliancewp
+Contributors: mlcalc
 Donate link: https://www.calculator.io/
-Tags: gdpr, cookie consent, gdpr compliance, privacy policy, cookie banner
-Requires at least: 4.9.6
+Tags: cookie-consent, gdpr, cookie-banner, gdpr-compliance, consent-mode
+Requires at least: 5.7
 Tested up to: 7.1
-Stable tag: 1.6.3
+Requires PHP: 7.4
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin adds GDPR-compliant cookie management to websites, ensuring legal compliance and enhancing user privacy.
+Cookie consent banner and GDPR tools: consent checkboxes, data access and erasure requests, and privacy policy links to help you manage consent.
 
 == Description ==
 
-GDPR Compliance and Cookie Consent is a free WordPress plugin designed to safeguard customer privacy and manage personal data responsibly on your website. It offers features such as transparent privacy and cookie policies, GDPR consent checkboxes, cookie blocking functionality, access to consumer data, and options for users to request data deletion. Compatible with WordPress 4.9.6 and higher, this essential plugin ensures compliance with GDPR standards, enhancing user trust.
+GDPR Compliance & Cookie Consent is a free WordPress plugin that helps you handle visitor consent and personal data requests on your website. It adds a customizable cookie consent banner, consent checkboxes for comments and popular form and e-commerce plugins, and a form where visitors can ask for a copy of their personal data or ask for it to be erased.
 
-## What is GDPR
+The plugin is a tool to help you work towards GDPR compliance. It does not give legal advice and does not make a site compliant on its own: you remain responsible for your privacy policy, your cookies and the way you process personal data.
 
-The General Data Protection Regulation (GDPR) is a regulation in EU law on data protection and privacy in the European Union and the European Economic Area. It also looks after the transfer of personal data outside of these areas.
+= Features =
 
-## GDPR Plugin Features
+* Cookie consent banner with your own text, button label, colors, position and optional custom CSS, plus an optional Decline button
+* Google Consent Mode v2: Google tags (Analytics, Ads, Tag Manager) wait for consent, and the visitor's choice is passed on to them (see "Google Consent Mode v2" below)
+* Works with page caching: the banner is shown or hidden in the browser from the consent cookie, so cached pages are correct for every visitor
+* Adjustable consent expiry time (default six months)
+* Optional cookie blocking until the visitor accepts the banner (see "What cookie blocking does" below)
+* Link to your Privacy Policy page from the banner, with custom link text
+* Consent checkboxes for WordPress comments, Contact Form 7, Gravity Forms, WooCommerce, BuddyPress and MailChimp forms, each with its own label and error message
+* Data access and erasure form for visitors, using WordPress' built-in personal data export and erasure requests with an email confirmation link
+* Gutenberg block "Data Access & Erasure Request", shortcode and widget to place the data request form anywhere
+* Translation-ready
+* Comment consent is recorded: the comments list shows when each commenter accepted
 
-**Ensure the Right to be Forgotten**
-Request to delete all stored data (confirmed by email link);
+= How to use =
 
-**Control Data Access**
-Dedicated form to request personal data stored on a website;
+After activation open "GDPR" in the admin menu. It has tabs for General (banner, cookie blocking, expiry, colors and position), Privacy Policy, Integrated plugins and Data access & to be forgotten. Click "Save changes" on each tab.
 
-**GDPR Consent checkboxes**
-Add consent boxes for various forms on your website like WordPress Comments and customized contact forms;
+To offer visitors the data access and erasure form, add the "Data Access & Erasure Request" block to a page, or use this shortcode (optional attributes `title` and `description`), or the "GDPR Compliance Widget":
 
-**Customizable Options**
-Privacy Policy, Terms of Services, Cookie Consent and Email marketing opt-in forms;
+`[stm-gpdr-data-access]`
 
-**Perfect Integration**
-Smooth integration with most popular WordPress plugins;
+= Google Consent Mode v2 =
 
-**Cookie Blocker**
-Block all cookies including analytics and advertising networks until formal consent to collect and use your data.
+The option "Google Consent Mode v2" (General tab, on by default, active while the consent banner is enabled) prints the Consent Mode default as early as possible in the page head: `ad_storage`, `ad_user_data`, `ad_personalization` and `analytics_storage` are denied, with `wait_for_update` set to 500 ms, together with the `dataLayer`/`gtag` stub. When the visitor accepts, declines, or a category is changed, the plugin calls `gtag('consent', 'update', ...)`. Analytics maps to `analytics_storage`; marketing maps to `ad_storage`, `ad_user_data` and `ad_personalization`. "Accept" grants both, "Decline" denies both, and returning visitors get their stored choice applied as an update on every page load. This happens in the browser from the consent cookie, so it works with cached pages. Themes and other plugins can set categories separately with `window.stmGdprSetConsent({analytics: true, marketing: false})`, and listen to the `stm_gdpr_consent` event. Your Google tags must load after the plugin's snippet (the plugin prints it with priority 1 in `wp_head`) and must respect Consent Mode, which Google Tag and Google Tag Manager templates do by default.
 
-## Who is it for?
+= What cookie blocking does =
 
-From May 25, 2018, all companies with EU citizens as customers who are visiting their website, regardless of the location of the company itself, need to abide by the GDPR rules when handling their personal data.
+When the "Block Cookies" option is on, until a visitor accepts the banner the plugin stops WordPress and other PHP plugins from setting cookies on the front end of your site, and a small script prevents cookies being written from JavaScript. It does not scan your site, categorize cookies, or stop third-party scripts (for example analytics or advertising tags) from loading, so check those separately.
 
-Information covered by GDPR includes names, user IDs, emails, addresses, contact details, web analytics, IP address, cookies, and other special categories of data (e.g., sensitive, genetic, health, gender, biometric).
+= What this plugin does not do =
 
-This handy GDPR plugin is straightforward to use and makes an excellent addition to any business WordPress website. It allows for any site to be GDPR compliant, and it is compatible with both the regulations and industry best practices. It is a WordPress business user’s best friend.
-
-## How do I use it?
-
-Once installed, you will be able to access the plugin from the main admin menu within WordPress - it is labeled GDPR. From here, you will see that there are four primary tabs: ‘general,’ ‘privacy policy,’ ‘integrated plugins,’ and ‘data access & to be forgotten.’
-
-Under the general tab, you can control all the privacy and cookie consent popups. Here you can opt to enable the popups, choose the cookie consent expiry time (the default being six months), write the messages included in the popups, and manage the colors of the box and the text. Finally, you can designate where the popups will appear on the page at the front end of the website.
-
-In the privacy policy section, you can select the page where your specific policy will be displayed. You can also customize the quick link that can be used to take your customers there so they can see why their data is being collected and how it will be managed.
-
-The integrated plugin section enables you to integrate the GDPR plugin with a range of other popular plugins that can be used to increase the functionality of your website further. The ones that are supported at present include:
-* Contact Form 7, which allows you to manage multiple contact forms.
-* Gravity Forms which offers the tools necessary for creating powerful contact forms.
-* Woocommerce which is designed to allow for e-commerce and online payment.
-* BuddyPress which enables the website to be transformed into a social network platform.
-* MailChimp, which lets you add signup forms to your website and allow customers to sign up for services.
-* WordPress Comments which facilitates interactions by enabling visitors to post comments.
-
-Data access & to be forgotten, the final tab, is a vital section of the plugin. This page is where users are provided with a form to access their data as well as the right to be forgotten. In this case, all collected data will be deleted.
-
-Again this section is fully customizable, you can create your own description, and you can enter your own messages. To enable users to access or delete their own personal data, you can insert a short code to a page or use a special widget.
-
-With each section of the plugin, you will need to click on ‘save changes’ to validate your changes and to ensure that your customizations are applied to your website.
-
-## How do my customers use it?
-
-The GDPR Compliance & Cookie Consent plugin has been carefully designed with the specific goal of protecting the personal data of your customers and other visitors to your website.
-
-While some businesses may need to collect personal or sensitive information due to the nature of the service being provided, ultimately, how this data is handled needs to be at the discretion of the customer. The goal of such GDPR compliance plugins is to give the consumers absolute control of their information.
-
-Such control is achieved here through the use of GDPR consent checkboxes, cookie blockers, and having the right to be forgotten, among other things. As well as providing specific consent for the collection of their data, the customer needs to be made aware of what will happen to it at every stage of proceedings – this is done through the use of a privacy policy.
-
-## Why should I get it?
-
-As previously outlined, from May 25, 2018, every website collecting data from EU residents or citizens need to address GDPR rules. This is a legal requirement for all online businesses, and the penalties for not abiding by such regulations are extremely harsh.
-
-Fines of up to €20 million or up to 4% of the annual worldwide turnover of the preceding financial year in case of an enterprise, whichever is greater, can be applied for not following such rules.
-
-The GDPR Compliance & Cookie Consent WordPress Plugin makes your website compatible with general GDPR regulations. This ensures that both you, the business owner, and your customers who are visiting your site and possibly providing sensitive data are protected under the laws.
+* It does not provide legal advice or a legal guarantee
+* It does not write your privacy policy for you
+* It does not automatically scan or classify the cookies used on your site
 
 == Screenshots ==
 
-1. GDPR
-2. Cookie Consent
-3. GDPR Compliance
-4. Privacy Policy
+1. The cookie consent banner on the front end.
+2. The data access and erasure request form (shortcode [stm-gpdr-data-access]).
+3. Data access settings with the request form on the front end.
+4. Consent checkbox settings for contact forms and WooCommerce.
+5. General settings of the cookie consent popup.
+
+== Upgrade Notice ==
+
+= 1.7.0 =
+Adds Google Consent Mode v2, a Decline button, a block for the data request form and fixes the banner reappearing behind page caches. Requires WordPress 5.7.
 
 == Installation ==
 1. Upload the plugin files to the `/wp-content/plugins/` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress
 3. Set Up Page in Menu -> GDPR.
 
+== Frequently Asked Questions ==
+
+= Does it block cookies before consent? =
+
+If you enable "Block Cookies" in the General tab, yes for cookies set by WordPress and PHP plugins on the front end and for cookies written by JavaScript on your pages, until the visitor accepts the banner. It does not stop third-party scripts such as analytics or ad tags from loading, so those need to be handled separately, for example by loading them only after consent.
+
+= Does it make my website GDPR compliant on its own? =
+
+No. It helps with several parts of the job, such as a consent banner, consent checkboxes and data requests, but compliance also depends on your privacy policy, how you process data and which services you use. If you need legal certainty, ask a qualified lawyer.
+
+= How do visitors request data deletion or a copy of their data? =
+
+Place the `[stm-gpdr-data-access]` shortcode on a page (or add the "GDPR Compliance Widget"). A visitor enters their email address and chooses "Export Personal Data" or "Erase Personal Data". WordPress sends a confirmation email, and after the visitor confirms, the request appears in your admin under Tools > Export Personal Data or Erase Personal Data, where you process it.
+
+= Which forms get consent checkboxes? =
+
+WordPress comments, Contact Form 7, Gravity Forms, WooCommerce, BuddyPress and MailChimp forms. Enable each integration on the "Integrated plugins" tab and edit its checkbox label and error message.
+
+= Is consent logged? =
+
+For WordPress comments the date and time the commenter ticked the checkbox is stored with the comment and shown in the comments list. For the cookie banner, acceptance is remembered in a cookie on the visitor's browser (and, for logged-in users, in their user profile data) until it expires; the plugin does not keep a central log of banner acceptances.
+
+= Does it work with caching plugins? =
+
+Yes. The banner is always printed hidden and the visitor's browser shows it only when there is no consent cookie, so page caches (WP Rocket, W3 Total Cache, LiteSpeed, Cloudflare and others) can serve the same HTML to everyone and no cookie needs to be excluded from the cache. Saving the plugin settings also clears the page cache of the common caching plugins. Cookie blocking and Consent Mode also run in the browser. If you still see an old banner after changing settings, purge your cache once.
+
+= Does it support Google Consent Mode v2? =
+
+Yes, it is on by default; see "Google Consent Mode v2" in the description. You can switch it off in the General tab. It works with Google Tag Manager, GA4 and Google Ads tags that honour Consent Mode, including those added by Site Kit.
+
+= How do I add the request form? =
+
+Add the "Data Access & Erasure Request" block in the block editor, or place the `[stm-gpdr-data-access]` shortcode on a page, or use the "GDPR Compliance Widget".
+
+= Can I show a Decline button? =
+
+Yes. New installs show it by default; on sites that already had the plugin, tick "Decline button" on the General tab. Under the GDPR, declining should be as easy as accepting. A declined visitor does not see the banner again until the consent cookie expires, Consent Mode stays denied, and the cookie blocker (if enabled) stays active.
+
+= The banner or the editor misbehaves in a page builder. =
+
+The banner, the cookie blocker and Consent Mode are skipped in the Customizer preview and in the WPBakery, Elementor, Divi, Beaver Builder, Oxygen, Brizy, Thrive and SiteOrigin editors.
+
 == Changelog ==
+
+= 1.7.0 =
+* Added Google Consent Mode v2 (on by default): consent defaults are printed in the page head, and accept, decline or category changes update Google tags. Returning visitors get their stored choice applied on load.
+* Added a Decline button: on by default for new installs, off for existing sites until you enable it (General tab).
+* Fixed the banner coming back on every page behind a page cache: it is now shown or hidden in the browser from the consent cookie, and an expired nonce on a cached page no longer prevents the choice from being saved.
+* Fixed the JavaScript cookie blocker, which blocked the consent cookie itself and was only loaded for visitors without the cookie.
+* Saving the settings now clears the page cache of WP Rocket, W3 Total Cache, WP Super Cache, SiteGround Optimizer and LiteSpeed Cache.
+* The banner, cookie blocker and Consent Mode no longer run inside page builder editors such as the WPBakery frontend editor.
+* Added a Gutenberg block for the data access and erasure request form; the shortcode accepts title and description.
+* Translation-ready: remaining strings, including the default texts, can be translated.
+* Review reminder in the admin after two weeks, dismissible.
+* Requires WordPress 5.7 or higher.
 
 = 1.6.3 =
 * Security hardening: all output of the cookie popup, consent checkboxes, widget and data access form is now escaped; popup colours, position and custom CSS are validated.

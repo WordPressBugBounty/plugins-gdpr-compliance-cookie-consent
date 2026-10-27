@@ -1,33 +1,41 @@
-var cookie = document.cookie;
+/* Blocks JavaScript cookies until the visitor has accepted. Loaded on every page (so cached HTML works) and switches
+   itself off when the consent cookie holds an acceptance. Only the consent cookie itself may be written. */
+(function () {
+    var NAME = 'stm_gdpr_cookie';
+    var proto = Object.getPrototypeOf(document);
+    var native = Object.getOwnPropertyDescriptor(proto, 'cookie') || Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
 
-Object.defineProperty(document, 'cookie', {
-    get: function () {
-        if (this._value) {
-            var parts = this._value.split('=');
-            var name = parts[0];
-
-            if (name) {
-                console.log("cookie blocked: " + name);
-                return '';
-            }
-        }
-
-        return this._value;
-    },
-    set: function (val) {
-        if (val) {
-            var parts = val.split('=');
-            var name = parts[0];
-
-            if (name) {
-                console.log("cookie blocked: " + name);
-                return '';
-            }
-        }
-
-        this._value = val;
-        return this._value;
+    if (!native || !native.configurable) {
+        return;
     }
-});
 
-document.cookie = cookie;
+    // Cookies are allowed once the visitor accepted; a declined visitor stays blocked.
+    function decided() {
+        var m = native.get.call(document).match(new RegExp('(?:^|; )' + NAME + '=([^;]*)'));
+        return !!m && decodeURIComponent(m[1]) !== 'declined';
+    }
+
+    if (decided()) {
+        return;
+    }
+
+    Object.defineProperty(document, 'cookie', {
+        configurable: true,
+        get: function () {
+            return native.get.call(document);
+        },
+        set: function (val) {
+            var name = String(val).split('=')[0].trim();
+            if (name === NAME) {
+                native.set.call(document, val);
+                if (decided()) {
+                    delete document.cookie;
+                }
+                return;
+            }
+            if (decided()) {
+                native.set.call(document, val);
+            }
+        }
+    });
+})();

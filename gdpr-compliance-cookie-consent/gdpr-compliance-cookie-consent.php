@@ -2,18 +2,19 @@
 /**
  * Plugin Name: GDPR Compliance & Cookie Consent
  * Plugin URI:  https://www.calculator.io/gdpr/
- * Description: This plugin adds GDPR-compliant cookie management to websites, ensuring legal compliance and enhancing user privacy.
+ * Description: Cookie consent banner and GDPR tools (consent checkboxes, data access and erasure requests) that help you manage visitor consent.
  * Author:      GDPR Compliance & Cookie Consent
  * Author URI:  https://www.calculator.io/gdpr/
  * License:     GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Version:     1.6.3
+ * Version:     1.7.0
+ * Requires PHP: 7.4
  * Text Domain: gdpr-compliance-cookie-consent
- * Domain Path: /languages
  */
 
 namespace STM_GDPR;
 
+use STM_GDPR\includes\STM_ConsentMode;
 use STM_GDPR\includes\STM_Cookie;
 use STM_GDPR\includes\STM_DataAccess;
 use STM_GDPR\includes\STM_PluginOptions;
@@ -24,12 +25,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('STM_GDPR_VERSION', '1.6.3');
+define('STM_GDPR_VERSION', '1.7.0');
 define('STM_GDPR_SLUG', 'gdpr-compliance-cookie-consent');
 define('STM_GDPR_PREFIX', 'stmgdpr_');
 define('STM_GDPR_ROOT_FILE', __FILE__);
 define('STM_GDPR_PATH', dirname(__FILE__));
 define('STM_GDPR_URL', plugins_url('', __FILE__));
+
+require_once STM_GDPR_PATH . '/includes/review-notice.php';
+require_once STM_GDPR_PATH . '/includes/block.php';
 
 spl_autoload_register(__NAMESPACE__ . '\\stm_autoload');
 add_action('plugins_loaded', array(STM_GDPR::getInstance(), 'init'));
@@ -54,7 +58,10 @@ class STM_GDPR
             add_action('admin_enqueue_scripts', array(STM_Helpers::getInstance(), 'stm_enqueue_admin_scripts'));
         }
 
-        if (STM_Helpers::stm_helpers_isEnabled(STM_GDPR_PREFIX . 'general', 'popup')) {
+        // Google Consent Mode v2: the default must be in <head> before any Google tag, hence priority 1.
+        add_action('wp_head', array(STM_ConsentMode::getInstance(), 'stm_consentmode_printDefault'), 1);
+
+        if (STM_Helpers::stm_helpers_isEnabled(STM_GDPR_PREFIX . 'general', 'popup') && !STM_Helpers::stm_helpers_isBuilderRequest()) {
             if (!STM_Cookie::getInstance()->stm_cookie_isAccepted() && !is_admin() && STM_Helpers::stm_helpers_cmb_get_option(STM_GDPR_PREFIX . 'general', 'block_cookies')) {
                 add_action('template_redirect', array(STM_Cookie::getInstance(), 'stm_cookie_block_cookies'), 0);
                 add_action('shutdown', array(STM_Cookie::getInstance(), 'stm_cookie_block_cookies'), 0);

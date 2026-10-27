@@ -17,18 +17,28 @@ class STM_Helpers
 
 	public function stm_enqueue_scripts(){
 
+		if (self::stm_helpers_isBuilderRequest()) {
+			return;
+		}
+
+		$expire_time = absint(self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'general', 'expire_time'));
+
 		wp_enqueue_script('stm-gdpr-scripts', STM_GDPR_URL . '/assets/js/scripts.js', array( 'jquery' ), STM_GDPR_VERSION, true);
 
 		wp_localize_script( 'stm-gdpr-scripts', 'stm_gdpr_vars', array(
 			'AjaxUrl' => admin_url( 'admin-ajax.php' ),
-			'error_prefix' => wp_kses_post( (string) self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'error_prefix') ),
-			'success' => wp_kses_post( (string) self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'success') ),
+			'error_prefix' => wp_kses_post( (string) self::stm_helpers_translateDefault( self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'error_prefix') ) ),
+			'success' => wp_kses_post( (string) self::stm_helpers_translateDefault( self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'data_access', 'success') ) ),
+			'request_failed' => __( 'The request could not be sent. Please reload the page and try again.', 'gdpr-compliance-cookie-consent' ),
 			'accept_nonce' => wp_create_nonce( 'stm_gdpr_cookie_accept' ),
 			'data_request_nonce' => wp_create_nonce( 'stm_gpdr_data_request' ),
+			'expire' => $expire_time ? $expire_time : 15768000,
+			'accepted' => STM_Cookie::getInstance()->stm_cookie_isAcceptedByUser(),
 		));
 
-		if(self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'general', 'block_cookies') && !STM_Cookie::getInstance()->stm_cookie_isAccepted()) {
-			wp_enqueue_script('stm-gdpr-block-cookies', STM_GDPR_URL . '/assets/js/block-cookies.js', array( 'jquery' ), STM_GDPR_VERSION, true);
+		// Not conditional on the visitor's cookie: the script checks the cookie itself, so a cached page works for everyone.
+		if (self::stm_helpers_isEnabled( STM_GDPR_PREFIX . 'general', 'popup') && self::stm_helpers_cmb_get_option( STM_GDPR_PREFIX . 'general', 'block_cookies') && !STM_Cookie::getInstance()->stm_cookie_isAcceptedByUser()) {
+			wp_enqueue_script('stm-gdpr-block-cookies', STM_GDPR_URL . '/assets/js/block-cookies.js', array(), STM_GDPR_VERSION, false);
 		}
 
 		wp_enqueue_style('stm-gdpr-styles', STM_GDPR_URL . '/assets/css/styles.css', array(), STM_GDPR_VERSION);
@@ -123,11 +133,46 @@ class STM_Helpers
 	public static function stm_helpers_popup_positions() {
 
 		return array(
-			'right_top_' => 'Right Top',
-			'left_top_' => 'Left Top',
-			'right_bottom_' => 'Right Bottom',
-			'left_bottom_' => 'Left Bottom',
+			'right_top_' => __('Right Top', 'gdpr-compliance-cookie-consent'),
+			'left_top_' => __('Left Top', 'gdpr-compliance-cookie-consent'),
+			'right_bottom_' => __('Right Bottom', 'gdpr-compliance-cookie-consent'),
+			'left_bottom_' => __('Left Bottom', 'gdpr-compliance-cookie-consent'),
 		);
+	}
+
+	/* Visual page builders and the Customizer preview: the banner and cookie blocking would only get in the way there. */
+	public static function stm_helpers_isBuilderRequest() {
+
+		if (function_exists('is_customize_preview') && is_customize_preview()) {
+			return true;
+		}
+
+		foreach (array('vc_editable', 'vc_action', 'elementor-preview', 'et_fb', 'fl_builder', 'ct_builder', 'brizy-edit', 'tve', 'siteorigin_panels_live_editor') as $param) {
+			if (isset($_GET[$param])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only checks whether a page builder preview flag is present; nothing is stored or output.
+				return true;
+			}
+		}
+
+		return (bool) apply_filters('stm_gdpr_is_builder_request', false);
+	}
+
+	/* Clears the page cache of common caching plugins, so changed banner settings reach visitors. */
+	public static function stm_helpers_purgeCaches() {
+
+		if (function_exists('rocket_clean_domain')) {
+			rocket_clean_domain();
+		}
+		if (function_exists('w3tc_flush_all')) {
+			w3tc_flush_all();
+		}
+		if (function_exists('wp_cache_clear_cache')) {
+			wp_cache_clear_cache();
+		}
+		if (function_exists('sg_cachepress_purge_cache')) {
+			sg_cachepress_purge_cache();
+		}
+		do_action('litespeed_purge_all'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- LiteSpeed Cache's own hook.
+		do_action('stm_gdpr_settings_saved');
 	}
 
 	/* Plugins */
@@ -268,6 +313,23 @@ class STM_Helpers
 		return $return;
 	}
 
+	/* Texts that ship as defaults are translated; text the site owner has edited is left alone (WPML covers that). */
+	public static function stm_helpers_translateDefault($string) {
+
+		$translated = array(
+			'This website uses cookies and asks your personal data to enhance your browsing experience.' => __('This website uses cookies and asks your personal data to enhance your browsing experience.', 'gdpr-compliance-cookie-consent'),
+			'Ok, I agree' => __('Ok, I agree', 'gdpr-compliance-cookie-consent'),
+			'Decline' => __('Decline', 'gdpr-compliance-cookie-consent'),
+			'Privacy Policy' => __('Privacy Policy', 'gdpr-compliance-cookie-consent'),
+			'Some errors occurred:' => __('Some errors occurred:', 'gdpr-compliance-cookie-consent'),
+			'Your request have been submitted. Check your email to validate your data request.' => __('Your request has been submitted. Check your email to validate your data request.', 'gdpr-compliance-cookie-consent'),
+			'I agree with storage and handling of my data by this website.' => __('I agree with storage and handling of my data by this website.', 'gdpr-compliance-cookie-consent'),
+			'You have to accept the privacy checkbox' => __('You have to accept the privacy checkbox', 'gdpr-compliance-cookie-consent'),
+		);
+
+		return (is_string($string) && isset($translated[$string])) ? $translated[$string] : $string;
+	}
+
 	public static function stm_helpers_dynamic_string_translation ($string) {
 		if (class_exists('SitePress')) {
 	    	do_action( 'wpml_register_single_string', 'gdpr-compliance-cookie-consent', $string, $string ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML's own hook.
@@ -296,7 +358,10 @@ class STM_Helpers
 		            "popup_content" => "This website uses cookies and asks your personal data to enhance your browsing experience.",
 		            "popup_bg_color" => "#131323",
 		            "popup_text_color" => "#fff",
-		            "popup_position" => "left_bottom_"
+		            "popup_position" => "left_bottom_",
+		            "consent_mode" => "on",
+		            "show_decline" => "on",
+		            "decline_text" => "Decline"
 		        )
 		    ),
 		    "stmgdpr_privacy" => array(
