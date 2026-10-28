@@ -7,7 +7,7 @@
  * Author URI:  https://www.calculator.io/gdpr/
  * License:     GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Version:     1.7.0
+ * Version:     1.7.1
  * Requires PHP: 7.4
  * Text Domain: gdpr-compliance-cookie-consent
  */
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('STM_GDPR_VERSION', '1.7.0');
+define('STM_GDPR_VERSION', '1.7.1');
 define('STM_GDPR_SLUG', 'gdpr-compliance-cookie-consent');
 define('STM_GDPR_PREFIX', 'stmgdpr_');
 define('STM_GDPR_ROOT_FILE', __FILE__);
@@ -52,6 +52,7 @@ class STM_GDPR
         if (is_admin()) {
             add_action('admin_menu', array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_addMenu'));
             add_action('admin_init', array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_registerSetting'));
+            add_action('admin_init', array(STM_Helpers::class, 'stm_helpers_fix_legacy_texts'));
             add_action('add_option_' . STM_GDPR_SLUG, array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_updated'));
             add_action('update_option_' . STM_GDPR_SLUG, array(STM_PluginOptions::getInstance(), 'stm_pluginOptions_updated'));
             add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'stm_pluginSettingsLink'));

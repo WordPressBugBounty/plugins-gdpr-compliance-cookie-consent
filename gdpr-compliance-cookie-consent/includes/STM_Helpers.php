@@ -323,11 +323,24 @@ class STM_Helpers
 			'Privacy Policy' => __('Privacy Policy', 'gdpr-compliance-cookie-consent'),
 			'Some errors occurred:' => __('Some errors occurred:', 'gdpr-compliance-cookie-consent'),
 			'Your request have been submitted. Check your email to validate your data request.' => __('Your request has been submitted. Check your email to validate your data request.', 'gdpr-compliance-cookie-consent'),
+			'Your request has been submitted. Check your email to validate your data request.' => __('Your request has been submitted. Check your email to validate your data request.', 'gdpr-compliance-cookie-consent'),
 			'I agree with storage and handling of my data by this website.' => __('I agree with storage and handling of my data by this website.', 'gdpr-compliance-cookie-consent'),
 			'You have to accept the privacy checkbox' => __('You have to accept the privacy checkbox', 'gdpr-compliance-cookie-consent'),
 		);
 
 		return (is_string($string) && isset($translated[$string])) ? $translated[$string] : $string;
+	}
+
+	/* Corrects the success message that up to 1.7.0 shipped with a typo, unless the site owner has edited it. */
+	public static function stm_helpers_fix_legacy_texts() {
+		$options = get_option(STM_GDPR_SLUG);
+		$group = STM_GDPR_PREFIX . 'data_access';
+		if (!is_array($options) || !isset($options[$group][0]['success'])
+			|| 'Your request have been submitted. Check your email to validate your data request.' !== $options[$group][0]['success']) {
+			return;
+		}
+		$options[$group][0]['success'] = 'Your request has been submitted. Check your email to validate your data request.';
+		update_option(STM_GDPR_SLUG, $options);
 	}
 
 	public static function stm_helpers_dynamic_string_translation ($string) {
@@ -385,7 +398,7 @@ class STM_Helpers
 		    "stmgdpr_data_access" => array(
 		        array(
 		            "error_prefix" => "Some errors occurred:",
-		            "success" => "Your request have been submitted. Check your email to validate your data request."
+		            "success" => "Your request has been submitted. Check your email to validate your data request."
 		        )
 		    )
 		);

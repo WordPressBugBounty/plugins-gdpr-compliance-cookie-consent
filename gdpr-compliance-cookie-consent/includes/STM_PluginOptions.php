@@ -56,7 +56,7 @@ class STM_PluginOptions
         $fields = array(
             STM_GDPR_PREFIX . 'general' => array(
                 'popup' => array('checkbox', __('Enable', 'gdpr-compliance-cookie-consent'), __('Display Privacy and Cookie popup box', 'gdpr-compliance-cookie-consent')),
-                'block_cookies' => array('checkbox', __('Block Cookies', 'gdpr-compliance-cookie-consent'), __('Block Cookies until accepting the Coockie Consent', 'gdpr-compliance-cookie-consent')),
+                'block_cookies' => array('checkbox', __('Block Cookies', 'gdpr-compliance-cookie-consent'), __('Block Cookies until accepting the Cookie Consent', 'gdpr-compliance-cookie-consent')),
                 'expire_time' => array('number', __('Expire time (seconds)', 'gdpr-compliance-cookie-consent'), __('Cookie consent expire time. Default 6 months', 'gdpr-compliance-cookie-consent')),
                 'button_text' => array('text', __('Button text', 'gdpr-compliance-cookie-consent')),
                 'show_decline' => array('checkbox', __('Decline button', 'gdpr-compliance-cookie-consent'), __('Show a Decline button next to the accept button', 'gdpr-compliance-cookie-consent')),

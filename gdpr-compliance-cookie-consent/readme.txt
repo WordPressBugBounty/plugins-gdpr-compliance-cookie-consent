@@ -5,7 +5,7 @@ Tags: cookie-consent, gdpr, cookie-banner, gdpr-compliance, consent-mode
 Requires at least: 5.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,13 +55,17 @@ When the "Block Cookies" option is on, until a visitor accepts the banner the pl
 
 == Screenshots ==
 
-1. The cookie consent banner on the front end.
-2. The data access and erasure request form (shortcode [stm-gpdr-data-access]).
-3. Data access settings with the request form on the front end.
-4. Consent checkbox settings for contact forms and WooCommerce.
-5. General settings of the cookie consent popup.
+1. The cookie consent banner with Accept and Decline buttons.
+2. The data access and erasure request form (shortcode [stm-gpdr-data-access] or the Data Access & Erasure Request block).
+3. Data access settings: messages and CSS classes for the request form.
+4. Consent checkbox settings for integrated plugins such as WordPress comments, Contact Form 7 and WooCommerce.
+5. General settings: banner, Decline button and Google Consent Mode v2.
+6. The Data Access & Erasure Request block in the block editor, with its settings in the sidebar.
 
 == Upgrade Notice ==
+
+= 1.7.1 =
+Fixes two typos in the settings and the default data request message.
 
 = 1.7.0 =
 Adds Google Consent Mode v2, a Decline button, a block for the data request form and fixes the banner reappearing behind page caches. Requires WordPress 5.7.
@@ -114,6 +118,9 @@ Yes. New installs show it by default; on sites that already had the plugin, tick
 The banner, the cookie blocker and Consent Mode are skipped in the Customizer preview and in the WPBakery, Elementor, Divi, Beaver Builder, Oxygen, Brizy, Thrive and SiteOrigin editors.
 
 == Changelog ==
+
+= 1.7.1 =
+* Fixed typos: "Coockie Consent" in the settings and "Your request have been submitted" in the default data request message (sites that kept the default message get it corrected).
 
 = 1.7.0 =
 * Added Google Consent Mode v2 (on by default): consent defaults are printed in the page head, and accept, decline or category changes update Google tags. Returning visitors get their stored choice applied on load.
